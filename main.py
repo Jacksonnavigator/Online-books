@@ -1,5 +1,4 @@
 import streamlit as st
-
 books = [
     {
         "title": "The Great Gatsby",
@@ -21,8 +20,7 @@ books = [
     }
 ]
 
-users = {}  # Dictionary to store user accounts
-
+users = {}  
 def main():
     st.title("Collaborative Online Book Store")
 
@@ -92,7 +90,7 @@ def login_page(login_state):
         if register(new_username, new_password):
             st.success("Registered and logged in successfully.")
         else:
-            st.error("Username already exists.")
+            st.error("Username already taken.")
 
 def view_books():
     st.header("Available Books")
@@ -107,10 +105,100 @@ def view_books():
 
 def order_books():
     st.header("Order Books")
-    
+
+    book_options = [book["title"] for book in books]
+    selected_book = st.selectbox("Select a book to order", book_options)
+
+    name = st.text_input("Name")
+    address = st.text_input("Address")
+    city = st.text_input("City")
+    state = st.text_input("State")
+    zip_code = st.text_input("Zip Code")
+
+    if st.button("Place Order"):
+        selected_book_index = book_options.index(selected_book)
+        selected_book = books[selected_book_index]
+
+        order = {
+            "book": selected_book["title"],
+            "author": selected_book["author"],
+            "name": name,
+            "address": address,
+            "city": city,
+            "state": state,
+            "zip_code": zip_code
+        }
+
+        username = get_login_state()["username"]
+        if username not in users:
+            users[username] = {"orders": []}
+        users[username]["orders"].append(order)
+
+        st.success("Order placed successfully!")
+
 def manage_books():
     st.header("Manage Books")
+
+    action = st.selectbox("Select an action", ["Add Book", "Edit Book", "Delete Book"])
+
+    if action == "Add Book":
+        add_book()
+    elif action == "Edit Book":
+        edit_book()
+    elif action == "Delete Book":
+        delete_book()
+
+def add_book():
+    st.subheader("Add Book")
+
+    title = st.text_input("Title")
+    author = st.text_input("Author")
+    description = st.text_area("Description")
+    link = st.text_input("Link")
+
+    if st.button("Add"):
+        book = {
+            "title": title,
+            "author": author,
+            "description": description,
+            "link": link
+        }
+        books.append(book)
+        st.success(f"Added '{title}' by {author} to the bookstore.")
+
+def edit_book():
+    st.subheader("Edit Book")
+
+    book_options = [book["title"] for book in books]
+    selected_book = st.selectbox("Select a book to edit", book_options)
+
+    selected_book_index = book_options.index(selected_book)
+    selected_book_data = books[selected_book_index]
     
+    new_title = st.text_input("Title", value=selected_book_data["title"])
+    new_author = st.text_input("Author", value=selected_book_data["author"])
+    new_description = st.text_area("Description", value=selected_book_data["description"])
+    new_link = st.text_input("Link", value=selected_book_data["link"])
+
+    if st.button("Save Changes"):
+        books[selected_book_index]["title"] = new_title
+        books[selected_book_index]["author"] = new_author
+        books[selected_book_index]["description"] = new_description
+        books[selected_book_index]["link"] = new_link
+
+        st.success(f"'{selected_book}' updated successfully.")
+
+def delete_book():
+    st.subheader("Delete Book")
+
+    book_options = [book["title"] for book in books]
+    selected_book = st.selectbox("Select a book to delete", book_options)
+
+    if st.button("Delete"):
+        selected_book_index = book_options.index(selected_book)
+        del books[selected_book_index]
+
+        st.success(f"'{selected_book}' deleted successfully.")
 
 if __name__ == "__main__":
-    main()
+  main()
