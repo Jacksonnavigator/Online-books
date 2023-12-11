@@ -22,7 +22,7 @@ books = [
 
 users = {}  
 def main():
-    st.title("Collaborative Online Book Store")
+    st.title("Online Book Store")
 
     login_state = get_login_state()
 
